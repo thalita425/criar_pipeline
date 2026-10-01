@@ -1,11 +1,16 @@
-name: Pipeline CI
+name: Pipeline CI e Publicacao Docker
 
 on:
   push:
-  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  validar-e-construir:
+  validar-e-publicar:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,5 +26,20 @@ jobs:
       - name: Verificar referencia CSS
         run: grep -q 'href="style.css"' index.html
 
+      - name: Preparar identificacao da imagem
+        run: |
+          IMAGE_ID="ghcr.io/${GITHUB_REPOSITORY,,}"
+          echo "IMAGE_ID=$IMAGE_ID" >> "$GITHUB_ENV"
+
       - name: Construir imagem Docker
-        run: docker build -t meu-primeiro-pipeline .
+        run: docker build -t "$IMAGE_ID:latest" .
+
+      - name: Autenticar no GHCR
+        run: |
+          echo "$GH_TOKEN" | docker login ghcr.io \
+            -u "$GITHUB_ACTOR" --password-stdin
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publicar imagem no GHCR
+        run: docker push "$IMAGE_ID:latest"
