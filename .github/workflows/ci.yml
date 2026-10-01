@@ -32,7 +32,7 @@ jobs:
           echo "IMAGE_ID=$IMAGE_ID" >> "$GITHUB_ENV"
 
       - name: Construir imagem Docker
-        run: docker build -t "$IMAGE_ID:latest" .
+        run: docker build -t "$IMAGE_ID:ultima-alteracao" .
 
       - name: Autenticar no GHCR
         run: |
@@ -42,4 +42,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publicar imagem no GHCR
-        run: docker push "$IMAGE_ID:latest"
+        run: docker push "$IMAGE_ID:ultima-alteracao"
